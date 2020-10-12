@@ -1,0 +1,24 @@
+diff -Naur external/toybox/toys/other/modinfo.c external/toybox/toys/other/modinfo.c
+--- external/toybox/toys/other/modinfo.c	2020-10-08 21:55:15.494379000 +0300
++++ external/toybox/toys/other/modinfo.c	2020-10-09 20:46:25.373176370 +0300
+@@ -108,7 +108,7 @@
+       struct utsname uts;
+ 
+       if (uname(&uts) < 0) perror_exit("bad uname");
+-      if (snprintf(toybuf, sizeof(toybuf), "%s/vendor/lib/modules",
++      if (snprintf(toybuf, sizeof(toybuf), "%s/system/lib/modules",
+           (toys.optflags & FLAG_b) ? TT.b : "") >= sizeof(toybuf))
+             perror_exit("basedir/kernrelease too long");
+       dirtree_read(toybuf, check_module);
+diff -Naur external/toybox/toys/pending/modprobe.c external/toybox/toys/pending/modprobe.c
+--- external/toybox/toys/pending/modprobe.c	2020-10-08 21:55:15.506379000 +0300
++++ external/toybox/toys/pending/modprobe.c	2020-10-09 20:46:35.661084967 +0300
+@@ -518,7 +518,7 @@
+   if (!TT.dirs) {
+     uname(&uts);
+     TT.dirs = xzalloc(sizeof(struct arg_list));
+-    TT.dirs->arg = xmprintf("/vendor/lib/modules");
++    TT.dirs->arg = xmprintf("/system/lib/modules");
+   }
+ 
+   // modules.dep processing for dependency check.
