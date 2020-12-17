@@ -1,56 +1,66 @@
 #!/bin/bash
 
-# Export some stuff for the script
+# Additional info
+#
+# Some stuff is from https://gitlab.com/kalilinux/nethunter/build-scripts/kali-nethunter-project/-/blob/master/nethunter-fs/build.sh
+# And somewhere else that i cant remember where anyhmore.
 
-# If u execute the script from the symlink then this will make the source as root folder for other scripts aswell.
-export SOURCE=$(pwd)
 
-# gna check if dialog is installed
+## Export some stuff for the script
 
-if [ $(dpkg-query -W -f='${Status}' dialog 2>/dev/null | grep -c "ok installed") -eq 0 ];
-then
-  echo "apt install dialog";
-  exit 1
+	# If u execute the script from the symlink then this will make the source as root folder for other scripts aswell.
+	export SOURCE=$(pwd)
+
+
+	# User selected device
+	export DEVICE=$1
+
+##
+
+
+display_help() {
+	echo "----------------------------------------------------------------------------------------"
+	echo "	Also this script needs u to have device tree and other stuff setted up!!!"
+	echo "----------------------------------------------------------------------------------------"
+	echo "	Usage: ./starter.sh lineage_codename-userdebug"
+	echo "	Example: ./starter.sh lineage_beryllium-userdebug"
+	echo "----------------------------------------------------------------------------------------"
+	echo "	-h, --help      display this help message"
+	echo "----------------------------------------------------------------------------------------"
+	echo "	Script version: 0.1.1"
+	echo "------------------------------"
+}
+
+
+# fail safe so u cant run it without additional argument (Forked from offsec :) )
+
+if [ $# -eq 0 ]; then
+	display_help
+	exit 0
 fi
 
+while [[ $# -gt 0 ]]; do
+	arg=$1
+	case $arg in
+		-h|--help)
+			display_help
+			exit 0 ;;
+	esac
+	shift
+done
 
-HEIGHT=30
-WIDTH=80
-CHOICE_HEIGHT=30
-BACKTITLE="Kernel compiler script"
-TITLE=""
-MENU="Choose one of the following options:"
+# lets make a tmp file for vars so starter can use these for every script
 
-OPTIONS=(1 "Setup base for beryllium no kernel"
-         2 "Setup base for j7y17lte no kernel"
-	 3 "Patching toybox"
-         4 "Exit"
-         )
+echo "SOURCE=$SOURCE" >> tmp
+echo "DEVICE=$DEVICE" >> tmp
 
-CHOICE=$(dialog --clear \
-                --backtitle "$BACKTITLE" \
-                --title "$TITLE" \
-                --menu "$MENU" \
-                $HEIGHT $WIDTH $CHOICE_HEIGHT \
-                "${OPTIONS[@]}" \
-                2>&1 >/dev/tty)
+# Also we cant forget to import aosp build tools
 
-clear
-case $CHOICE in
-        1)
-            echo "Setting up beryllium"
-            ./patcher/scripts/beryllium.sh
-            ;;
-        2)
-            echo "Setting up j7y17lte"
-            ./patcher/scripts/j7y17lte.sh
-            ;;
-        3)
-            echo "Patches toybox"
-            ./patcher/toybox.sh
-            ;;
-        4)
-            echo "Bye."
-            exit 1
-            ;;
-esac
+. build/envsetup
+
+# And now to the UI
+./starter/scripts/menu
+
+# And cleanup
+
+rm -rf tmp
